@@ -51,7 +51,8 @@ void printSerialTable(State* state, HardwareSerial &s){
 }
 
 
-void sampleData(State* state){
+void sampleData(State* state, long pips){
+  // TODO compute ODO from pips
   state->odo = 0;
   state->voltage = 0.0f;
   state->oilTemp = 0.0f;
@@ -64,23 +65,25 @@ void sampleData(State* state){
   state->lowBeam = false;
   state->highBeam = false;
 
-  mockData(state);
+  
+
+  mockData(state, pips);
 }
 
 // TODO to be removed and replaced with actual sampling
-void mockData(State* state) {
-  state->rpm = abs(((looper*10)%26000)-13000);
-  state->odo = (looper) % 20000;
-  state->voltage = abs(((looper/10) % 100)-50) / 10.0f + 11.0f ;
-  state->oilTemp = ((looper / 5) % 1300) / 10.0f;
-  state->gear = ((looper / 100) % 7);
-  state->fuel = abs( ((looper / 8) + 50) % 200-100);
-  state->temp = (abs((((looper / 8) % 200)-100)) / 2.0f) + 60;
-  state->speed = (looper/5) % 250;
-  state->turnlight = ((looper / 200) % 2) > 0;
-  state->neutral = ((looper / 200) % 2) < 1;
-  state->engine = ((looper / 200) % 2) > 0;
-  state->lowBeam = ((looper / 200) % 2) <1 ;
-  state->highBeam = ((looper / 200) % 2) > 0;
+void mockData(State* state, long pips) {
+  state->rpm = abs(((pips*10)%26000)-13000);
+  state->odo = (pips) % 20000;
+  state->voltage = abs(((pips/10) % 100)-50) / 10.0f + 11.0f ;
+  state->oilTemp = ((pips / 5) % 1300) / 10.0f;
+  state->gear = ((pips / 100) % 7);
+  state->fuel = abs( ((pips / 8) + 50) % 200-100);
+  state->temp = (abs((((pips / 8) % 200)-100)) / 2.0f) + 60;
+  state->speed = (pips/5) % 250;
+  state->turnlight = ((pips / 200) % 2) > 0;
+  state->neutral = ((pips / 200) % 2) < 1;
+  state->engine = ((pips / 200) % 2) > 0;
+  state->lowBeam = ((pips / 200) % 2) <1 ;
+  state->highBeam = ((pips / 200) % 2) > 0;
 }
 
