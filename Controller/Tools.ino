@@ -1,5 +1,5 @@
-void sendData(State* state){   
-  if (SerialBT.hasClient()) {
+void sendData(State* state, BluetoothSerial &s){   
+  if (s.hasClient()) {
     String payload = (String) "#{"
     +"\"gear\":"+ (state->gear > 0 ? (String)state->gear : "null")
     +",\"odo\":"+state->odo
@@ -15,71 +15,39 @@ void sendData(State* state){
     +",\"lowBeam\":"+ (state->lowBeam ? "true":"false")
     +",\"highBeam\":"+ (state->highBeam ? "true":"false")
     +"}#";
-    SerialBT.print(payload);
+    s.print(payload);
   }
 }
 
-void printSerialTable(State* state){
-  Serial.println();
-  Serial.println();
-  Serial.println();
-  Serial.println();
-  Serial.println();
-  Serial.println();
-  Serial.println();
-  Serial.println();
-  Serial.println();
-  Serial.println();
-  Serial.println();
-  Serial.println();
-
-  Serial.print('*');
-  Serial.print("\t"); 
-  Serial.print("RPM");      
-  Serial.print("\t"); 
-  Serial.print("Speed");      
-  Serial.print("\t"); 
-  Serial.print("Odo");      
-  Serial.print("\t"); 
-  Serial.print("Fuel");      
-  Serial.print("\t"); 
-  Serial.println('*');
-
-  Serial.print('*');
-  Serial.print("\t"); 
-  Serial.print(state->rpm);      
-  Serial.print("\t"); 
-  Serial.print(state->speed);    
-  Serial.print("\t"); 
-  Serial.print(state->odo);    
-  Serial.print("\t"); 
-  Serial.print(state->fuel);    
-  Serial.print("\t"); 
-  Serial.println('*');
-
-  Serial.print('*');
-  Serial.print("\t"); 
-  Serial.print("Gear");      
-  Serial.print("\t"); 
-  Serial.print("Temp");      
-  Serial.print("\t"); 
-  Serial.print("Voltage");      
-  Serial.print("\t"); 
-  Serial.print("Oil");      
-  Serial.print("\t"); 
-  Serial.println('*');
-
-  Serial.print('*');
-  Serial.print("\t"); 
-  Serial.print(state->gear);    
-  Serial.print("\t"); 
-  Serial.print(state->temp);    
-  Serial.print("\t"); 
-  Serial.print(state->voltage);    
-  Serial.print("\t"); 
-  Serial.print(state->oilTemp);    
-  Serial.print("\t"); 
-  Serial.println('*');
+void printSerialTable(State* state, HardwareSerial &s){
+  s.println("\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n");
+  s.println("****************************************************");
+  s.println("*\tData\t\t\t\t*");
+  s.println("****************************************************");
+  s.println("*\t\t\t\t\t*");
+  s.println("*\tRPM\tSpeed\tOdo\tFuel\t*"); 
+  s.print("*\t");  
+  s.print(state->rpm);      
+  s.print("\t"); 
+  s.print(state->speed);    
+  s.print("\t"); 
+  s.print(state->odo);    
+  s.print("\t"); 
+  s.print(state->fuel);    
+  s.println("\t*");
+  s.println("*\t\t\t\t\t*");
+  s.println("*\tGear\tTemp\tVoltage\tOil\t*"); 
+  s.print("*\t"); 
+  s.print(state->gear);    
+  s.print("\t"); 
+  s.print(state->temp);    
+  s.print("\t"); 
+  s.print(state->voltage);    
+  s.print("\t"); 
+  s.print(state->oilTemp);    
+  s.println("\t*");
+  s.println("*\t\t\t\t\t*");
+  s.println("****************************************************");
 }
 
 
@@ -95,6 +63,8 @@ void sampleData(State* state){
   state->engine = false;
   state->lowBeam = false;
   state->highBeam = false;
+
+  mockData(state);
 }
 
 // TODO to be removed and replaced with actual sampling
