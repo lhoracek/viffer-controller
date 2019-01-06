@@ -1,47 +1,98 @@
-/*
-    Video: https://www.youtube.com/watch?v=oCMOYS71NIU
-    Based on Neil Kolban example for IDF: https://github.com/nkolban/esp32-snippets/blob/master/cpp_utils/tests/BLE%20Tests/SampleNotify.cpp
-    Ported to Arduino ESP32 by Evandro Copercini
+//This example code is in the Public Domain (or CC0 licensed, at your option.)
+//By Evandro Copercini - 2018
+//
+//This example creates a bridge between Serial and Classical Bluetooth (SPP)
+//and also demonstrate that x have the same functionalities of a normal Serial
 
-   Create a BLE server that, once we receive a connection, will send periodic notifications.
-   The service advertises itself as: 6E400001-B5A3-F393-E0A9-E50E24DCCA9E
-   Has a characteristic of: 6E400002-B5A3-F393-E0A9-E50E24DCCA9E - used for receiving data with "WRITE" 
-   Has a characteristic of: 6E400003-B5A3-F393-E0A9-E50E24DCCA9E - used to send data with  "NOTIFY"
+#include "BluetoothSerial.h"
 
-   The design of creating the BLE server is:
-   1. Create a BLE Server
-   2. Create a BLE Service
-   3. Create a BLE Characteristic on the Service
-   4. Create a BLE Descriptor on the characteristic
-   5. Start the service.
-   6. Start advertising.
+#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
+#endif
 
-   In this example rxValue is the data received (only accessible inside that function).
-   And txValue is the data to be sent, in this example just a byte incremented every second. 
-*/
+BluetoothSerial SerialBT;
+const int ledPin = 2;
+int looper = 0;
 
-
-
-
-
+int rpm = 0;
+int gear = 0;
+int odo = 0;
+float voltage = 0;
+float oilTemp = 0;
+int fuel = 0;
+int temp = 0;
+int speed = 0;
+boolean turnlight = false;
+boolean neutral = false;
+boolean engine = false;
+boolean lowBeam = false;
+boolean highBeam = false;
 
 void setup() {
   Serial.begin(115200);
+  SerialBT.begin("ESP32test"); //Bluetooth device name
+  Serial.println("The device started, now you can pair it with bluetooth!");
 
-  setupBluetooth();
-  
-  Serial.println("Waiting a client connection to notify...");
-  // initialize digital pin LED_BUILTIN as an output.
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode (ledPin, OUTPUT);
 }
+
+void updateData() {
+  // TODO  
+}
+
+// TODO to be removed and replaced with actual sampling
+void mockData() {
+  looper ++ ;
+  looper ++ ;
+  rpm = abs(((looper*1000)%26000)-13000);
+  odo = (looper * 10) % 20000;
+  voltage = abs(((looper) % 100)-50) / 10.0f + 11.0f ;
+  oilTemp = ((looper * 5) % 1300) / 10.0f;
+  gear = ((looper / 10) % 7);
+  fuel = abs( ((looper * 2) + 50) % 200-100);
+  temp = (abs(((looper * 3) % 200-100)) / 2.0f) + 60;
+  speed = looper % 250;
+  turnlight = ((looper / 20) % 2) > 0;
+  neutral = ((looper / 20) % 2) < 1;
+  engine = ((looper / 20) % 2) > 0;
+  lowBeam = ((looper / 20) % 2) <1 ;
+  highBeam = ((looper / 20) % 2) > 0;
+  
+}
+
+
+
+void sendData(){
+   
+    String payload = (String) "#{"
+    +"\"gear\":"+ (gear > 0 ? (String)gear : "null")
+    +",\"odo\":"+odo
+    +",\"rpm\":" + rpm 
+    +",\"voltage\":"+voltage
+    +",\"oilTemp\":"+oilTemp
+    +",\"fuel\":"+fuel
+    +",\"temp\":"+temp
+    +",\"speed\":"+speed
+    +",\"turnlight\":"+ (turnlight ? "true":"false")
+    +",\"neutral\":"+ (neutral ? "true":"false")
+    +",\"engine\":"+ (engine ? "true":"false")
+    +",\"lowBeam\":"+ (lowBeam ? "true":"false")
+    +",\"highBeam\":"+ (highBeam ? "true":"false")
+    +"}#";
+  if (SerialBT.hasClient()) {
+    SerialBT.print(payload);
+  }
+  Serial.println(payload);
+}
+
 
 void loop() {
 
-  if (deviceConnected) {
-    Serial.printf("*** Sent Value: %d ***\n", "Value updated");
-    pTxCharacteristic->setValue("String");
-    pTxCharacteristic->notify();
-  }
-  digitalWrite(LED_BUILTIN, deviceConnected ? LOW : HIGH);
+
+  mockData();
+  sendData();
+
+  digitalWrite (ledPin, SerialBT.hasClient() ? HIGH : LOW);  
+
   delay(50);
 }
