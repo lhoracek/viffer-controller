@@ -50,7 +50,6 @@ void printSerialTable(State* state, HardwareSerial &s){
   s.println("****************************************************");
 }
 
-
 void sampleData(State* state, long pips){
   // TODO compute ODO from pips
   state->odo = 0;
@@ -65,8 +64,6 @@ void sampleData(State* state, long pips){
   state->lowBeam = false;
   state->highBeam = false;
 
-  
-
   mockData(state, pips);
 }
 
@@ -75,7 +72,7 @@ void mockData(State* state, long pips) {
   state->rpm = abs(((pips*10)%26000)-13000);
   state->odo = (pips) % 20000;
   state->voltage = abs(((pips/10) % 100)-50) / 10.0f + 11.0f ;
-  state->oilTemp = ((pips / 5) % 1300) / 10.0f;
+  state->oilTemp = (((pips / 5) % 600) / 10.0f) + 60;
   state->gear = ((pips / 100) % 7);
   state->fuel = abs( ((pips / 8) + 50) % 200-100);
   state->temp = (abs((((pips / 8) % 200)-100)) / 2.0f) + 60;
@@ -86,4 +83,5 @@ void mockData(State* state, long pips) {
   state->lowBeam = ((pips / 200) % 2) <1 ;
   state->highBeam = ((pips / 200) % 2) > 0;
 }
+
 

@@ -62,9 +62,8 @@ void setup() {
   pinMode(SPEED_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(SPEED_PIN), handleSpeedInterrupt, RISING);
 
-  display.begin(); 
+  display.begin();  
   display.set_contrast(255);
-  display.draw_string(0,0,"Viffer 750"); 
 }
 
 // TODO replace by timers
@@ -87,10 +86,12 @@ void loop() {
   }
 
   if(timerPassed(&displayTimer,DISPLAY_MILLIS)){
-    drawDisplay(&state, display);
+    drawDisplay(&state, display, SerialBT);
   }
   
   digitalWrite (LED_PIN, SerialBT.hasClient() ? HIGH : LOW);
   delay(1);
 }
+
+
 
